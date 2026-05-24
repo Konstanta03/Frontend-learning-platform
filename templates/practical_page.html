@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="card">
+        <div class="section-title">
+            <div>
+                <h1>{{ task.title }}</h1>
+                <p class="muted">{{ task.description }}</p>
+            </div>
+            <a class="btn-secondary" href="{{ url_for('student_dashboard') }}">Назад</a>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+            <label>Коментар до виконання</label>
+            <textarea name="notes">{{ existing.notes if existing else '' }}</textarea>
+
+            <label class="field-label">Прикріпити файл виконаного завдання</label>
+            <input type="file" name="file">
+
+            {% if existing and existing.file_name %}
+                <p class="field-note">
+                    Поточний файл:
+                    <a href="{{ url_for('uploaded_file', filename=existing.file_name) }}">
+                        {{ existing.file_name }}
+                    </a>
+                </p>
+            {% endif %}
+
+            {% if existing %}
+                <div class="hero-note field-note">
+                    <b>Поточний статус:</b> {{ existing.status }}<br>
+                    <b>Бал учителя:</b>
+                    {{ existing.teacher_score if existing.teacher_score is not none else 'ще не виставлено' }}<br>
+                    <b>Коментар учителя:</b> {{ existing.teacher_comment or 'поки що відсутній' }}
+                </div>
+            {% endif %}
+
+            <button class="btn field-note" type="submit">Надіслати / оновити роботу</button>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="section-title">
+        <div>
+            <h1>Кабінет вчителя</h1>
+        </div>
+        <span class="badge">Вчитель</span>
+    </div>
+
+    <div class="grid">
+        <section class="col-4 card">
+            <div class="section-title">
+                <h2>Додати учня в групу</h2>
+            </div>
+
+            <form method="post" action="{{ url_for('add_student') }}">
+                <label>ПІБ</label>
+                <input name="full_name" required>
+
+                <label class="field-label">Логін</label>
+                <input name="username" required>
+
+                <label class="field-label">Пароль</label>
+                <input name="password" required>
+
+                <label class="field-label">Клас</label>
+                <input name="class_name" required>
+
+                <button class="btn full-width field-note" type="submit">Додати учня</button>
+            </form>
+        </section>
+
+        <section class="col-8 card">
+            <div class="section-title">
+                <div>
+                    <h2>Група учнів та прогрес</h2>
+                    <p class="muted">Відображаються учні вибраної групи.</p>
+                </div>
+                <form method="get" class="filter-form">
+                    <select name="group" onchange="this.form.submit()">
+                        <option value="">Усі групи</option>
+                        {% for g in groups %}
+                            <option value="{{ g.class_name }}" {% if selected_group == g.class_name %}selected{% endif %}>
+                                {{ g.class_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Учень</th>
+                            <th>Клас</th>
+                            <th>Дата народження</th>
+                            <th>Школа</th>
+                            <th>Про себе</th>
+                            <th>Дія</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in students %}
+                            <tr>
+                                <td>{{ s.full_name }}</td>
+                                <td>{{ s.class_name or '—' }}</td>
+                                <td>{{ s.birth_date or '—' }}</td>
+                                <td>{{ s.school_name or '—' }}</td>
+                                <td>{{ s.about_me or '—' }}</td>
+                                <td>
+                                    <form method="post" action="{{ url_for('delete_student', student_id=s.id) }}" onsubmit="return confirm('Видалити цього учня з групи?');">
+                                        <button class="btn-danger" type="submit">Видалити</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6">Учнів поки немає.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <div class="grid block-gap">
+        <section class="col-6 card">
+            <div class="section-title">
+                <h2>Результати тестів</h2>
+                <span class="muted">Середній результат формується за всіма тестами</span>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Учень</th>
+                            <th>Клас</th>
+                            <th>Тест</th>
+                            <th>Результат</th>
+                            <th>Дата</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in results %}
+                            <tr>
+                                <td>{{ r.full_name }}</td>
+                                <td>{{ r.class_name }}</td>
+                                <td>{{ r.title }}</td>
+                                <td>{{ r.score_percent }}%</td>
+                                <td>{{ r.created_at[:16].replace('T',' ') }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5">Результати тестів поки відсутні.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="col-6 card">
+            <div class="section-title">
+                <h2>Перевірка практичних робіт</h2>
+                <span class="muted">Файли учнів</span>
+            </div>
+
+            {% for s in submissions %}
+                <div class="bordered-card">
+                    <div>
+                        <span class="badge">{{ s.class_name }}</span>
+                        <span class="badge">{{ s.status }}</span>
+                    </div>
+
+                    <h3>{{ s.full_name }} — {{ s.title }}</h3>
+                    <p><b>Опис / коментар учня:</b> {{ s.notes or '—' }}</p>
+
+                    {% if s.file_name %}
+                        <p>
+                            <a href="{{ url_for('uploaded_file', filename=s.file_name) }}">
+                                Завантажити прикріплений файл
+                            </a>
+                        </p>
+                    {% endif %}
+
+                    <form method="post" action="{{ url_for('grade_submission', submission_id=s.id) }}">
+                        <div class="row">
+                            <div>
+                                <label>Бал</label>
+                                <input
+                                    type="number"
+                                    name="teacher_score"
+                                    min="0"
+                                    max="100"
+                                    value="{{ s.teacher_score if s.teacher_score is not none else '' }}"
+                                >
+                            </div>
+                            <div>
+                                <label>Коментар вчителя</label>
+                                <input name="teacher_comment" value="{{ s.teacher_comment or '' }}">
+                            </div>
+                        </div>
+
+                        <button class="btn field-note" type="submit">Зберегти оцінку</button>
+                    </form>
+                </div>
+            {% else %}
+                <p class="muted">Практичні роботи ще не надійшли.</p>
+            {% endfor %}
+        </section>
+    </div>
+{% endblock %}

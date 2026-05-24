@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="uk">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Front-End Learning Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% if session.get('user_id') %}
+        <header class="topbar">
+            <div class="topbar-inner">
+                <div>
+                    <div class="brand-title">Front-End Learning Platform</div>
+                </div>
+
+                <div class="nav-links">
+                    {% if session.get('role') == 'student' %}
+                        <a class="btn-secondary" href="{{ url_for('student_dashboard') }}">Кабінет учня</a>
+                    {% else %}
+                        <a class="btn-secondary" href="{{ url_for('teacher_dashboard') }}">Кабінет вчителя</a>
+                    {% endif %}
+                    <a class="btn-danger" href="{{ url_for('logout') }}">Вийти</a>
+                </div>
+            </div>
+        </header>
+    {% endif %}
+
+    <main class="{{ 'container' if session.get('user_id') else '' }}">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

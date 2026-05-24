@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="login-shell">
+        <div class="login-card">
+            <h1>Реєстрація вчителя</h1>
+            <p class="muted">
+                Тільки обліковий запис вчителя
+            </p>
+
+            <form method="post" class="auth-form">
+                <label>ПІБ вчителя</label>
+                <input name="full_name" required>
+
+                <label>Логін</label>
+                <input name="username" required>
+
+                <label>Пароль</label>
+                <input name="password" type="password" required>
+
+                <label>Повторіть пароль</label>
+                <input name="password_confirm" type="password" required>
+
+                <label>Навчальний заклад</label>
+                <input name="school_name">
+
+                <label>Про себе</label>
+                <textarea name="about_me"></textarea>
+
+                <button class="btn" type="submit">Зареєструватися</button>
+            </form>
+
+            <div class="auth-footer">
+                <a href="{{ url_for('login') }}">Повернутися до входу</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

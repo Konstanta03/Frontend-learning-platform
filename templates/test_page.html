@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="card">
+        <div class="section-title">
+            <div>
+                <h1>{{ test.title }}</h1>
+                <p class="muted">{{ test.description }}</p>
+            </div>
+            <a class="btn-secondary" href="{{ url_for('student_dashboard') }}">Назад</a>
+        </div>
+
+        <form method="post">
+            {% for q in questions %}
+                <div class="test-question">
+                    <b>{{ loop.index }}. {{ q.question_text }}</b>
+                    {% set opts = q.options.split('|') %}
+
+                    {% for opt in opts %}
+                        <label class="option">
+                            <input type="radio" name="q_{{ q.id }}" value="{{ loop.index0 }}" required>
+                            {{ opt }}
+                        </label>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <button class="btn" type="submit">Завершити тест</button>
+        </form>
+    </div>
+{% endblock %}

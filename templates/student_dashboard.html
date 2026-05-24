@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="section-title">
+        <div>
+            <h1>Кабінет учня</h1>
+            <p class="muted">
+                Теоретичні модулі, тести, практичні роботи
+            </p>
+        </div>
+        <div>
+            <span class="badge">{{ user.class_name or 'Клас не вказано' }}</span>
+            <span class="badge">{{ user.full_name }}</span>
+        </div>
+    </div>
+
+    <div class="stats">
+        <div class="stat">
+            <div class="muted">Середній результат тестів</div>
+            <div class="value">{{ avg_test }}%</div>
+        </div>
+        <div class="stat">
+            <div class="muted">Середній бал за практику</div>
+            <div class="value">{{ avg_practice }}</div>
+        </div>
+        <div class="stat">
+            <div class="muted">Пройдено тестів</div>
+            <div class="value">{{ test_results|length }}</div>
+        </div>
+        <div class="stat">
+            <div class="muted">Надіслано практичних</div>
+            <div class="value">{{ submissions|length }}</div>
+        </div>
+    </div>
+
+    <div class="grid block-gap">
+        <section class="col-8 card">
+            <div class="section-title">
+                <h2>Модулі курсу</h2>
+                <span class="muted">10 модулів з теорією та простими прикладами</span>
+            </div>
+
+            {% for module in modules %}
+                <div class="module-card bordered-card">
+                    <div><span class="badge">Модуль {{ loop.index }}</span></div>
+                    <h3>{{ module.title }}</h3>
+                    <p>{{ module.short }}</p>
+                    <ul>
+                        {% for p in module.theory %}
+                            <li>{{ p }}</li>
+                        {% endfor %}
+                    </ul>
+                    <div class="example-box">
+                        <b>Простий приклад:</b> {{ module.example }}
+                    </div>
+                </div>
+            {% endfor %}
+        </section>
+
+        <aside class="col-4 card">
+            <div class="section-title">
+                <h2>Анкета учня</h2>
+            </div>
+
+            <form method="post" action="{{ url_for('update_student_profile') }}">
+                <label>ПІБ</label>
+                <input value="{{ user.full_name }}" disabled>
+
+                <label class="field-label">Клас</label>
+                <input name="class_name" value="{{ user.class_name or '' }}">
+
+                <label class="field-label">Дата народження</label>
+                <input name="birth_date" type="date" value="{{ user.birth_date or '' }}">
+
+                <label class="field-label">Школа</label>
+                <input name="school_name" value="{{ user.school_name or '' }}">
+
+                <label class="field-label">Цікавинки про себе</label>
+                <textarea name="about_me">{{ user.about_me or '' }}</textarea>
+
+                <button class="btn full-width field-note" type="submit">Зберегти анкету</button>
+            </form>
+        </aside>
+    </div>
+
+    <div class="grid block-gap">
+        <section class="col-6 card">
+            <div class="section-title">
+                <h2>Тести</h2>
+                <span class="muted">9 тестівь</span>
+            </div>
+
+            {% for test in tests %}
+                <div class="module-card bordered-card">
+                    <h3>{{ test.title }}</h3>
+                    <p>{{ test.description }}</p>
+                    <a class="btn" href="{{ url_for('take_test', test_id=test.id) }}">Пройти тест</a>
+                </div>
+            {% endfor %}
+        </section>
+
+        <section class="col-6 card">
+            <div class="section-title">
+                <h2>Практичні завдання</h2>
+                <span class="muted">Для кожного завдання тре прикріпити файл</span>
+            </div>
+
+            {% for task in practicals %}
+                <div class="module-card bordered-card">
+                    <h3>{{ loop.index }}. {{ task.title }}</h3>
+                    <p>{{ task.description }}</p>
+                    <a class="btn" href="{{ url_for('practical_task', task_id=task.id) }}">
+                        Відкрити завдання
+                    </a>
+                </div>
+            {% endfor %}
+        </section>
+    </div>
+
+    <div class="grid block-gap">
+        <section class="col-6 card">
+            <div class="section-title">
+                <h2>Результати тестів</h2>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Тест</th>
+                            <th>Результат</th>
+                            <th>Дата</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in test_results %}
+                            <tr>
+                                <td>{{ r.title }}</td>
+                                <td>{{ r.score_percent }}%</td>
+                                <td>{{ r.created_at[:16].replace('T',' ') }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="3">Тести ще не проходилися.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="col-6 card">
+            <div class="section-title">
+                <h2>Практика та оцінювання</h2>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Завдання</th>
+                            <th>Статус</th>
+                            <th>Бал</th>
+                            <th>Коментар</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in submissions %}
+                            <tr>
+                                <td>{{ s.title }}</td>
+                                <td>{{ s.status }}</td>
+                                <td>{{ s.teacher_score if s.teacher_score is not none else '—' }}</td>
+                                <td>{{ s.teacher_comment or '—' }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="4">Практичні роботи ще не надсилалися.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+{% endblock %}

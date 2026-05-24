@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="login-shell">
+        <div class="login-card">
+            <h1>Вхід до системи</h1>
+            <p class="muted">
+                Авторизація для учнів та вчителів. 
+            </p>
+            <form method="post" class="auth-form">
+                <label>Логін</label>
+                <input name="username" required>
+
+                <label>Пароль</label>
+                <input name="password" type="password" required>
+
+                <button class="btn" type="submit">Увійти</button>
+            </form>
+
+            <div class="auth-footer">
+                <span class="muted">Потрібен кабінет вчителя?</span>
+                <a href="{{ url_for('register_teacher') }}">Зареєструвати вчителя</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
